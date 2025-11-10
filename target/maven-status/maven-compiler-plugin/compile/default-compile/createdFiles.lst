@@ -1,0 +1,4 @@
+erp\pages\BasePages.class
+erp\pages\ComercialPage.class
+erp\utils\WaitUtils.class
+erp\config\ConfigManager.class
