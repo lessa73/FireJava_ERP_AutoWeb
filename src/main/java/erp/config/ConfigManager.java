@@ -15,6 +15,11 @@ public class ConfigManager {
             e.printStackTrace();
         }
     }
+
+    // Dados de teste - podem ser movidos para arquivo de configuração
+ /*    private static final String URL = System.getProperty("erp.url", "http://www.fluxis.com.br:8083/fluxis/login.do");
+    private static final String USUARIO = System.getProperty("username", "alexandre.lessa@celer.matriz");
+    private static final String SENHA = System.getProperty("password", "0"); */
     
     public static String getProperty(String key) {
         return properties.getProperty(key);

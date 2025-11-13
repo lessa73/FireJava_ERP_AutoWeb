@@ -1,4 +1,51 @@
 -------------------------------------------------------------------------------
 Test set: test.TestComercial
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 9.916 s -- in test.TestComercial
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 41.72 s <<< FAILURE! -- in test.TestComercial
+test.TestComercial.acessarTelaCadastroProposta -- Time elapsed: 41.67 s <<< ERROR!
+java.lang.RuntimeException: Teste falhou: Falha ao selecionar cliente: DESTOM INDUSTRIA
+	at test.TestComercial.acessarTelaCadastroProposta(TestComercial.java:70)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: java.lang.RuntimeException: Falha ao selecionar cliente: DESTOM INDUSTRIA
+	at erp.pages.ComercialPage.selecionarCliente(ComercialPage.java:202)
+	at test.TestComercial.acessarTelaCadastroProposta(TestComercial.java:61)
+	... 3 more
+Caused by: java.lang.RuntimeException: Falha ao selecionar autocomplete: DESTOM INDUSTRIA
+	at erp.utils.AutocompleteHelper.selecionarOpcao(AutocompleteHelper.java:89)
+	at erp.pages.ComercialPage.selecionarCliente(ComercialPage.java:196)
+	... 4 more
+Caused by: org.openqa.selenium.TimeoutException: Expected condition failed: waiting for presence of element located by: By.xpath: //div[contains(@onclick, 'Autocomplete') and contains(text(), '20.746.370/0001-80 - DESTOM INDUSTRIA E COMERCIO IMPORTACAO E EXPORTACAO LTDA')] (tried for 15 second(s) with 500 milliseconds interval)
+	at org.openqa.selenium.support.ui.WebDriverWait.timeoutException(WebDriverWait.java:84)
+	at org.openqa.selenium.support.ui.FluentWait.until(FluentWait.java:229)
+	at erp.utils.AutocompleteHelper.localizarOpcao(AutocompleteHelper.java:198)
+	at erp.utils.AutocompleteHelper.selecionarOpcao(AutocompleteHelper.java:73)
+	... 5 more
+Caused by: org.openqa.selenium.NoSuchElementException: Unable to locate element: //div[contains(@onclick, 'Autocomplete') and contains(text(), '20.746.370/0001-80 - DESTOM INDUSTRIA E COMERCIO IMPORTACAO E EXPORTACAO LTDA')]
+For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Build info: version: '4.15.0', revision: '1d14b5521b'
+System info: os.name: 'Windows 11', os.arch: 'amd64', os.version: '10.0', java.version: '21.0.7'
+Driver info: org.openqa.selenium.firefox.FirefoxDriver
+Command: [65029865-4174-420b-8613-ad5463c1ad12, findElement {using=xpath, value=//div[contains(@onclick, 'Autocomplete') and contains(text(), '20.746.370/0001-80 - DESTOM INDUSTRIA E COMERCIO IMPORTACAO E EXPORTACAO LTDA')]}]
+Capabilities {acceptInsecureCerts: true, browserName: firefox, browserVersion: 145.0, moz:accessibilityChecks: false, moz:buildID: 20251106194447, moz:geckodriverVersion: 0.36.0, moz:headless: false, moz:platformVersion: 10.0, moz:processID: 18656, moz:profile: C:\Users\Home\AppData\Local..., moz:shutdownTimeout: 60000, moz:webdriverClick: true, moz:windowless: false, pageLoadStrategy: normal, platformName: windows, proxy: Proxy(), setWindowRect: true, strictFileInteractability: false, timeouts: {implicit: 0, pageLoad: 300000, script: 30000}, unhandledPromptBehavior: dismiss and notify, userAgent: Mozilla/5.0 (Windows NT 10....}
+Session ID: 65029865-4174-420b-8613-ad5463c1ad12
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)
+	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.createException(W3CHttpResponseCodec.java:200)
+	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:133)
+	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:52)
+	at org.openqa.selenium.remote.HttpCommandExecutor.execute(HttpCommandExecutor.java:191)
+	at org.openqa.selenium.remote.service.DriverCommandExecutor.invokeExecute(DriverCommandExecutor.java:200)
+	at org.openqa.selenium.remote.service.DriverCommandExecutor.execute(DriverCommandExecutor.java:175)
+	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:607)
+	at org.openqa.selenium.remote.ElementLocation$ElementFinder$2.findElement(ElementLocation.java:165)
+	at org.openqa.selenium.remote.ElementLocation.findElement(ElementLocation.java:59)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:364)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:358)
+	at org.openqa.selenium.support.ui.ExpectedConditions$6.apply(ExpectedConditions.java:171)
+	at org.openqa.selenium.support.ui.ExpectedConditions$6.apply(ExpectedConditions.java:168)
+	at org.openqa.selenium.support.ui.FluentWait.until(FluentWait.java:204)
+	... 7 more
+
