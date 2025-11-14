@@ -13,13 +13,13 @@ import org.slf4j.LoggerFactory;
 import erp.pages.ComercialPage;
 
 public class TestComercial {
-    
+
     private static final Logger log = LoggerFactory.getLogger(TestComercial.class);
-    
+
     private static final String URL_DEFAULT = "http://www.fluxis.com.br:8083/fluxis/login.do";
     private static final String USUARIO_DEFAULT = "alexandre.lessa@celer.matriz";
     private static final String SENHA_DEFAULT = "0";
-    
+
     private WebDriver driver;
     private ComercialPage comercialPage;
 
@@ -36,7 +36,7 @@ public class TestComercial {
     @Test
     public void acessarTelaCadastroProposta() {
         log.info("=== Iniciando teste: acessarTelaCadastroProposta ===");
-        
+
         try {
             // Arrange - Preparar dados
             String url = System.getProperty("erp.url", URL_DEFAULT);
@@ -51,18 +51,33 @@ public class TestComercial {
             // Act - Navegar e preencher
             log.info("Acessando tela de cadastro");
             comercialPage.acessarTelaCadastro();
-            
+
             log.info("Preenchendo prazo");
             comercialPage.preencherPrazo("15");
-            
+
             comercialPage.aguardarSegundos(2, "Aguardando antes de selecionar o cliente");
-            
+
             log.info("Selecionando cliente");
             comercialPage.selecionarCliente(
-                "DESTOM INDUSTRIA",
-                "20.746.370/0001-80 - DESTOM INDUSTRIA E COMERCIO IMPORTACAO E EXPORTACAO LTDA"
+                    "DESTOM INDUSTRIA",
+                    "20.746.370/0001-80 - DESTOM INDUSTRIA E COMERCIO IMPORTACAO E EXPORTACAO LTDA"
             );
-            
+
+            comercialPage.aguardarSegundos(2, "Aguardando após seleção do cliente");
+
+            log.info("Selecionando vendedor");
+            comercialPage.selecionarVendedor(
+                    "Alex",
+                    "Alexandre Lessa (Fluxis)"
+            );
+
+            comercialPage.aguardarSegundos(2, "Aguardando antes de selecionar utilização");
+
+            log.info("Selecionando utilização");
+            comercialPage.selecionarUtilizacao("Venda de produto/mercadoria");
+
+            comercialPage.aguardarSegundos(3, "Aguardando visualização final");
+
             log.info("=== Teste concluído com sucesso ===");
 
         } catch (Exception e) {
@@ -81,14 +96,10 @@ public class TestComercial {
                 log.warn("Interrupção durante aguardo final");
                 Thread.currentThread().interrupt();
             }
-            
+
             log.info("Fechando browser");
             driver.quit();
             log.info("Teardown concluído");
         }
     }
 }
-   
-    
-
-    

@@ -1,298 +1,211 @@
 package erp.pages;
 
+import java.time.Duration;
+
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import erp.utils.AutocompleteHelper;
+import erp.utils.Select2Helper;
 
-public class ComercialPage extends BasePages {
+public class ComercialPage {
 
     private static final Logger log = LoggerFactory.getLogger(ComercialPage.class);
+
+    private final WebDriver driver;
+    private final WebDriverWait wait;
+    private final JavascriptExecutor js;
     private final AutocompleteHelper autocompleteHelper;
+    private final Select2Helper select2Helper;
 
-    // =======================================================
-    // CONSTANTES
-    // =======================================================
-    private static final String IFRAME_PROPOSTA = "iframe[src*='proposta.do']";
-    private static final int DELAY_PADRAO = 3000;
+    // Locators
+    private final By campoUsuario = By.id("usuario");
+    private final By campoSenha = By.id("senha");
+    private final By botaoEntrar = By.cssSelector("button[type='submit']");
 
-    // =======================================================
-    // LOCATORS DE LOGIN
-    // =======================================================
-    private final By inputUsuario = By.id("username");
-    private final By inputSenha = By.id("password");
-    private final By btnLogin = By.cssSelector("input[type='submit'][value='Login']");
-    private final By menuPrincipal = By.id("menuDiv");
+    private final By menuComercial = By.xpath("//a[@href='/fluxis/comercial/comercial_menu.do']");
+    private final By opcaoNovaProposta = By.xpath("//a[@href='/fluxis/comercial/cadastro_proposta.do']");
 
-    // =======================================================
-    // LOCATORS DO MENU
-    // =======================================================
-    private final By menuComercial = By.xpath("//div[@id='ThemeOffice_Comercial' and text()='Comercial']");
-    private final By menuProposta = By.xpath("//div[@id='cmSubMenuID19_Proposta' and text()='Proposta']");
-    private final By menuCadastro = By.xpath("//div[@id='cmSubMenuID35_Cadastro' and text()='Cadastro']");
+    private final By campoPrazo = By.id("prazo");
+    private final By campoCliente = By.id("cliente");
+    private final By campoVendedor = By.id("representante");
+    private final By selectUtilizacao = By.id("utilizacao");
 
-    // =======================================================
-    // LOCATORS DOS CAMPOS
-    // =======================================================
-    private final By inputPrazoDias = By.id("prazoDias");
-    private final By inputCliente = By.id("cliente");
-    private final By inputVendedor = By.id("representante");
-    private final By inputUtilizacao = By.id("utilizacao");
-    private final By inputTabelaPreco = By.id("tabelaPreco");
-    private final By inputIndicadorOperacao = By.id("indicadorOperacao");
-
-    // =======================================================
-    // CONSTRUTOR
-    // =======================================================
     public ComercialPage(WebDriver driver) {
-        super(driver);
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+        this.js = (JavascriptExecutor) driver;
         this.autocompleteHelper = new AutocompleteHelper(driver);
-    }
-
-    // =======================================================
-    // MÉTODOS DE LOGIN
-    // =======================================================
-    
-    /**
-     * Abre a URL do sistema
-     * @param url URL do sistema ERP
-     */
-    public void abrir(String url) {
-        log.info("Abrindo URL: {}", url);
-        driver.get(url);
+        this.select2Helper = new Select2Helper(driver);
+        log.info("ComercialPage inicializada");
     }
 
     /**
-     * Preenche o campo de usuário
-     * @param usuario Nome do usuário
+     * Realiza o login completo no sistema
      */
-    public void preencherUsuario(String usuario) {
-        log.debug("Preenchendo usuário: {}", usuario);
-        wait.until(ExpectedConditions.elementToBeClickable(inputUsuario)).sendKeys(usuario);
-    }
-
-    /**
-     * Preenche o campo de senha
-     * @param senha Senha do usuário
-     */
-    public void preencherSenha(String senha) {
-        log.debug("Preenchendo senha");
-        wait.until(ExpectedConditions.elementToBeClickable(inputSenha)).sendKeys(senha);
-    }
-
-    /**
-     * Clica no botão de login
-     */
-    public void clicarLogin() {
-        log.debug("Clicando no botão de login");
-        wait.until(ExpectedConditions.elementToBeClickable(btnLogin)).click();
-    }
-
-    /**
-     * Valida se o login foi realizado com sucesso
-     * @return true se o menu principal estiver visível
-     */
-    public boolean loginComSucesso() {
+    public boolean realizarLoginCompleto(String url, String usuario, String senha) {
         try {
-            wait.until(ExpectedConditions.visibilityOfElementLocated(menuPrincipal));
-            log.info("Login realizado com sucesso");
-            return true;
+            log.info("Acessando URL: {}", url);
+            driver.get(url);
+
+            aguardarSegundos(2, "Aguardando página de login carregar");
+
+            log.info("Preenchendo usuário: {}", usuario);
+            WebElement campoUser = wait.until(ExpectedConditions.presenceOfElementLocated(campoUsuario));
+            campoUser.clear();
+            campoUser.sendKeys(usuario);
+
+            log.info("Preenchendo senha");
+            WebElement campoPass = driver.findElement(campoSenha);
+            campoPass.clear();
+            campoPass.sendKeys(senha);
+
+            log.info("Clicando em Entrar");
+            WebElement btnEntrar = driver.findElement(botaoEntrar);
+            btnEntrar.click();
+
+            aguardarSegundos(3, "Aguardando login ser processado");
+
+            String urlAtual = driver.getCurrentUrl();
+            log.info("URL após login: {}", urlAtual);
+
+            boolean loginSucesso = !urlAtual.contains("login.do");
+
+            if (loginSucesso) {
+                log.info("✓ Login realizado com sucesso!");
+            } else {
+                log.error("✗ Login falhou - ainda na página de login");
+            }
+
+            return loginSucesso;
+
         } catch (Exception e) {
-            log.error("Falha no login: {}", e.getMessage());
+            log.error("Erro ao realizar login: {}", e.getMessage(), e);
             return false;
         }
     }
 
     /**
-     * Realiza o login completo no sistema
-     * @param url URL do sistema
-     * @param usuario Nome do usuário
-     * @param senha Senha do usuário
-     * @return true se o login foi bem-sucedido
-     */
-    public boolean realizarLoginCompleto(String url, String usuario, String senha) {
-        log.info("Iniciando processo de login completo");
-        abrir(url);
-        preencherUsuario(usuario);
-        preencherSenha(senha);
-        clicarLogin();
-        return loginComSucesso();
-    }
-
-    // =======================================================
-    // MÉTODOS DE NAVEGAÇÃO
-    // =======================================================
-    
-    /**
-     * Acessa a tela de cadastro de proposta através do menu
+     * Acessa a tela de cadastro de proposta
      */
     public void acessarTelaCadastro() {
         try {
-            log.info("Acessando tela de cadastro de proposta...");
+            log.info("Navegando para menu Comercial");
 
-            // Clica no menu Comercial
-            clicarElemento(menuComercial);
+            WebElement menuCom = wait.until(ExpectedConditions.elementToBeClickable(menuComercial));
+            menuCom.click();
 
-            // Hover no menu Proposta
-            Actions actions = new Actions(driver);
-            WebElement proposta = wait.until(ExpectedConditions.visibilityOfElementLocated(menuProposta));
-            actions.moveToElement(proposta).perform();
+            aguardarSegundos(2, "Aguardando menu expandir");
 
-            // Clica em Cadastro
-            clicarElemento(menuCadastro);
+            log.info("Clicando em Nova Proposta");
+            WebElement novaProp = wait.until(ExpectedConditions.elementToBeClickable(opcaoNovaProposta));
+            novaProp.click();
 
-            // Muda para o iframe da proposta
-            mudarParaIframe(IFRAME_PROPOSTA);
-            aguardarIframeCarregarCompletamente();
-            
-            // Aguarda campo prazo estar disponível (indicador de carregamento completo)
-            aguardarElementoClicavel(inputPrazoDias);
+            aguardarSegundos(2, "Aguardando tela de cadastro carregar");
 
-            log.info("Tela de cadastro carregada com sucesso");
+            log.info("✓ Tela de cadastro acessada");
 
         } catch (Exception e) {
             log.error("Erro ao acessar tela de cadastro: {}", e.getMessage(), e);
-            throw new RuntimeException("Falha ao acessar tela de cadastro de proposta", e);
+            throw new RuntimeException("Falha ao acessar tela de cadastro", e);
         }
     }
 
-    // =======================================================
-    // MÉTODOS DE PREENCHIMENTO DE CAMPOS
-    // =======================================================
-    
     /**
-     * Preenche o campo de prazo em dias
-     * @param dias Quantidade de dias
+     * Preenche o campo Prazo
      */
-    public void preencherPrazo(String dias) {
-        log.info("Preenchendo prazo: {} dias", dias);
-        preencherCampo(inputPrazoDias, dias);
-        aguardarPaginaCarregar();
-    }
-
-    /**
-     * Seleciona cliente usando autocomplete
-     * Utiliza a classe AutocompleteHelper para realizar a seleção
-     * 
-     * @param nomeCliente Nome do cliente para busca (ex: "DESTOM INDUSTRIA")
-     * @param cnpjENomeCompleto CNPJ e nome completo da opção (ex: "20.746.370/0001-80 - DESTOM INDUSTRIA E COMERCIO IMPORTACAO E EXPORTACAO LTDA")
-     */
-    public void selecionarCliente(String nomeCliente, String cnpjENomeCompleto) {
+    public void preencherPrazo(String prazo) {
         try {
-            log.info("Iniciando seleção de cliente: {}", nomeCliente);
-            
-            // Aguarda a página estar estável
-            aguardarPaginaCarregar();
-            aguardarIntervalo(DELAY_PADRAO);
-            aguardarElementoClicavel(inputCliente);
-            aguardarAjaxCompletar();
-            
-            // Delega a seleção para o AutocompleteHelper
-            autocompleteHelper.selecionarOpcao(inputCliente, nomeCliente, cnpjENomeCompleto);
-            
-            log.info("Cliente '{}' selecionado com sucesso", nomeCliente);
-            
+            log.info("Preenchendo prazo: {} dias", prazo);
+
+            WebElement campo = wait.until(ExpectedConditions.presenceOfElementLocated(campoPrazo));
+            wait.until(ExpectedConditions.visibilityOf(campo));
+
+            campo.clear();
+            campo.sendKeys(prazo);
+
+            log.info("✓ Prazo preenchido");
+
         } catch (Exception e) {
-            log.error("Erro ao selecionar cliente '{}': {}", nomeCliente, e.getMessage(), e);
-            throw new RuntimeException("Falha ao selecionar cliente: " + nomeCliente, e);
+            log.error("Erro ao preencher prazo: {}", e.getMessage(), e);
+            throw new RuntimeException("Falha ao preencher prazo", e);
         }
     }
 
     /**
-     * Seleciona vendedor usando autocomplete
-     * @param nomeVendedor Nome do vendedor para busca
-     * @param opcaoCompleta Texto completo da opção no autocomplete
+     * Seleciona o cliente usando autocomplete
      */
-    public void selecionarVendedor(String nomeVendedor, String opcaoCompleta) {
+    public void selecionarCliente(String textoDigitar, String opcaoCompleta) {
         try {
-            log.info("Selecionando vendedor: {}", nomeVendedor);
-            
-            aguardarPaginaCarregar();
-            aguardarElementoClicavel(inputVendedor);
-            aguardarAjaxCompletar();
-            
-            autocompleteHelper.selecionarOpcao(inputVendedor, nomeVendedor, opcaoCompleta);
-            
-            log.info("Vendedor selecionado com sucesso");
-            
+            log.info("Selecionando cliente");
+            autocompleteHelper.selecionarOpcao(campoCliente, textoDigitar, opcaoCompleta);
+            log.info("✓ Cliente selecionado");
+        } catch (Exception e) {
+            log.error("Erro ao selecionar cliente: {}", e.getMessage(), e);
+            throw new RuntimeException("Falha ao selecionar cliente", e);
+        }
+    }
+
+    /**
+     * Seleciona o vendedor usando autocomplete
+     */
+    public void selecionarVendedor(String textoDigitar, String opcaoCompleta) {
+        try {
+            log.info("Selecionando vendedor");
+            autocompleteHelper.selecionarOpcao(campoVendedor, textoDigitar, opcaoCompleta);
+            log.info("✓ Vendedor selecionado");
         } catch (Exception e) {
             log.error("Erro ao selecionar vendedor: {}", e.getMessage(), e);
-            throw new RuntimeException("Falha ao selecionar vendedor: " + nomeVendedor, e);
+            throw new RuntimeException("Falha ao selecionar vendedor", e);
         }
     }
 
     /**
-     * Seleciona utilização usando autocomplete
-     * @param utilizacao Texto da utilização
-     * @param opcaoCompleta Texto completo da opção no autocomplete
+     * Seleciona a utilização usando Select2
      */
-    public void selecionarUtilizacao(String utilizacao, String opcaoCompleta) {
+    public void selecionarUtilizacao(String textoOpcao) {
         try {
-            log.info("Selecionando utilização: {}", utilizacao);
-            
-            aguardarPaginaCarregar();
-            aguardarElementoClicavel(inputUtilizacao);
-            aguardarAjaxCompletar();
-            
-            autocompleteHelper.selecionarOpcao(inputUtilizacao, utilizacao, opcaoCompleta);
-            
-            log.info("Utilização selecionada com sucesso");
-            
+            log.info("Selecionando utilização: {}", textoOpcao);
+            select2Helper.selecionarOpcao("utilizacao", textoOpcao);
+            log.info("✓ Utilização selecionada");
         } catch (Exception e) {
             log.error("Erro ao selecionar utilização: {}", e.getMessage(), e);
-            throw new RuntimeException("Falha ao selecionar utilização: " + utilizacao, e);
+            throw new RuntimeException("Falha ao selecionar utilização", e);
         }
     }
 
     /**
-     * Seleciona tabela de preço usando autocomplete
-     * @param tabelaPreco Nome da tabela
-     * @param opcaoCompleta Texto completo da opção no autocomplete
+     * Seleciona a utilização por valor (value do option)
      */
-    public void selecionarTabelaPreco(String tabelaPreco, String opcaoCompleta) {
+    public void selecionarUtilizacaoPorValor(String valor) {
         try {
-            log.info("Selecionando tabela de preço: {}", tabelaPreco);
-            
-            aguardarPaginaCarregar();
-            aguardarElementoClicavel(inputTabelaPreco);
-            aguardarAjaxCompletar();
-            
-            autocompleteHelper.selecionarOpcao(inputTabelaPreco, tabelaPreco, opcaoCompleta);
-            
-            log.info("Tabela de preço selecionada com sucesso");
-            
+            log.info("Selecionando utilização por valor: {}", valor);
+            select2Helper.selecionarPorValor("utilizacao", valor);
+            log.info("✓ Utilização selecionada por valor");
         } catch (Exception e) {
-            log.error("Erro ao selecionar tabela de preço: {}", e.getMessage(), e);
-            throw new RuntimeException("Falha ao selecionar tabela de preço: " + tabelaPreco, e);
+            log.error("Erro ao selecionar utilização por valor: {}", e.getMessage(), e);
+            throw new RuntimeException("Falha ao selecionar utilização por valor", e);
         }
     }
 
-    // =======================================================
-    // MÉTODOS UTILITÁRIOS
-    // =======================================================
-    
     /**
-     * Aguarda um tempo específico com log detalhado
-     * @param segundos Tempo em segundos
-     * @param motivo Motivo da espera (para log)
+     * Aguarda um tempo específico
      */
-    public void aguardarSegundos(int segundos, String motivo) {
+    public void aguardarSegundos(int segundos, String mensagem) {
         try {
-            log.info("Aguardando {} segundos - Motivo: {}", segundos, motivo);
-            Thread.sleep(segundos * 1000);
-            log.debug("Aguardo de {} segundos concluído", segundos);
+            if (mensagem != null && !mensagem.isEmpty()) {
+                log.info(mensagem);
+            }
+            Thread.sleep(segundos * 1000L);
         } catch (InterruptedException e) {
-            log.warn("Interrupção durante aguardo: {}", e.getMessage());
+            log.warn("Aguardo interrompido");
             Thread.currentThread().interrupt();
         }
     }
-    
-    // ATENÇÃO: MÉTODOS REMOVIDOS DAQUI
-    // aguardarPaginaCarregar(), aguardarIntervalo(), aguardarAjaxCompletar()
-    // e aguardarIframeCarregarCompletamente() já estão implementados na BasePages
 }
